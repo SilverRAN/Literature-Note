@@ -1,3 +1,35 @@
+# Swin Transformer Embedding UNet for Remote Sensing Image Semantic Segmentation
+
 ## Abstract
 
 通过经典的global context information和CNN的locality来阐述使用Transformer的必要性。文章提出了一个双头编码结构（SwinTransformer+CNN）的模型；提出了一个spatial interaction module（SIM）和feature compression module（FCM）以及relational aggregation module（RAM）。实验数据使用ISPRS的Vaihingen和Potsdam数据集。
+
+## Introduction
+略过
+
+## Related work
+略过
+
+## Method
+A主要介绍了整体架构，之后的B，C，D，E四个subsection分别详细介绍了Swin-Transformer，SIM，FCM和RAM。
+
+模型结构在图3中展示，第一眼看上去很像HiFormer，也是一个主编码结构，配合另一个Transformer结构作为补充
+为了避免在生成完全不重叠的patch的过程中丢失局部联系信息，实验中生成的patch是存在50%重合区域的。
+它的auxiliary encoder部分是由4个Swin-Transformer blocks组成的，其中每个部分都加入了自己设计的SIM模块，目的是弥补基于窗口的自注意力的局限性，并缓解由遮挡引起的语义模糊问题。这里的遮挡指的应该就是Swin-Transformer的掩码机制。
+此外，为了跟main encoder生成的特征尺寸吻合，在每个Swin-Transformer block后面都加了一个FCM模块用来减小patch token的长度。同时作者还提出FCM具有避免小尺度物体特征遗漏的功能。
+Main encoder使用的是ResNet50，在两个编码器都完成相应阶段的计算之后，相同尺寸的特征被输入RAM模块，返回的结果被重新输入到main encoder的下一个block。此处作者提到，RAM模块是通过deformable convolution和channel attention mechanism建立了两个编码器之间的联系。
+解码端没有什么特点，和U-Net一样的逐步上采样得到原图同样大小的输出。
+
+B 略过
+
+C Spatial Interaction Module
+作者认为Swin-Transformer使用的窗口注意力策略虽然有效减小了内存占用量，但是该策略还是在一定程度上影响了Transformer全局建模的能力，因此作者设计了SIM以“在w和h两个空间维度上应用注意力，从而不仅考虑patch之间的关系也能考虑到pixel之间的关系”。从图中我们可以看到具体做法就是将上一个Swin-Transformer block得到的输出重新reshape成三维特征，然后使用带dilation的卷积缩减维度后分别在w和h两个方向上使用average pooling，再将得到的结果相乘，重新reshape回到linear tensor
+
+D Feature compression module
+先介绍了设计FCM的目的：提高对于小尺度目标的识别能力。图中展示了具体做法：该模块也是双头结构，主干部分是一个3x3带dilation的卷积来增大感受野，获取更多的小尺度目标的信息，前后分别一个1x1的卷积一个增加维度，一个减小尺寸。分支部分使用了soft-pooling操作，“可以以指数加权的方式激活池化内核中的像素，以保存更详细的信息”。总之，两个分支一个是提供更多的小尺度特征，另一个是用来提供细节。
+
+E Relational aggregation module
+根据作者的说法，特征图的channel dependence有助于区分有着相似分布模式但channel差异很大的物体，因此这个模块的主要作用就是针对channel dependence显式建模。也是双分支结构，针对CNN产生的特征使用deformable convolution以适应不同形状的物体区域。而对Swin-Transformer产生的特征，此处原文描述不是很清楚，因为Swin-Transformer block的输出应该是1维的linear tensor，而EAM得到的输入似乎是reshape之后的3维tensor，我们姑且认为是先对Swin-Transformer的输出进行了reshape，然后针对每个channel进行不同的pooling操作，将分别得到的结果做类似注意力机制的运算得到输出，然后将这里的输出作为权重和经deformable convolution计算的CNN输出相乘计算，最后通过一个三者的残差相加得到结果。
+
+## Experiments
+暂略，之后填坑
