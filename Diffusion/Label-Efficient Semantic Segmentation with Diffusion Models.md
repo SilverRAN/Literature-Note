@@ -22,3 +22,8 @@ Diffusion model作为当下SOTA的生成模型，已经在相当多的任务上�
 介绍了文章所提出的语义分割架构，即通过大量无标注训练样本进行自监督预训练，然后使用少量带有ground truth的样本对segmentation head进行微调。特征从{5，6，7，8，12}这五个block和{50，150，250}三个time step的组合得到。其模型架构中并没有进行逐层上采样，而是统一将所有的features全都直接插值到原图尺寸然后concatenate，得到一个(1024+512+512+512+256)=8448维的tensor，然后使用一个MLP层对每个pixel的通道进行降维和预测，得到每个pixel的类别。
 
 ## Experiments
+实验从LSUN选取了"bedroom","cat"和"horse"三个categories以及FFHQ-256作为数据集。除了真实数据之外，还分别用GAN和DDPM生成了一定数量的样本。此外还加入了ADE-Bedroom-30和CelebA-19两个数据集。实验选取的baseline如下：
+* DatasetGAN：一种用于生成大量带有语义分割标签的图片样本的生成器，仅需要少量带标注的样本对其额外分支进行训练（专门用于和DatasetDDPM做对比）
+* ALAE/GAN Inversion/GAN Encoder（基于GAN的方法）
+* VDVAE（目前最好的自编码器方法）
+* SwAV/MAE（自监督方法）
