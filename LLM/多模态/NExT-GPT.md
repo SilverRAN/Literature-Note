@@ -1,4 +1,5 @@
 [NExT-GPT:Any-to-Any Multimodal Large Language Model](https://arxiv.org/pdf/2309.05519.pdf)
+
 [Project page](https://next-gpt.github.io/)
 
 Demo测试结果：比较差，语义理解能力不够强，且无法做分割、检测等传统任务。
