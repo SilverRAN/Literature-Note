@@ -10,4 +10,4 @@ Arxiv: [this link](https://arxiv.org/pdf/2210.09276.pdf)
 但是需要注意的是，为了保证后续线性插值操作的有效性，上述第一步的embedding优化操作只能进行很少几次迭代，因此即使是e<sub>opt</sub>也不能保证生成和原图完全一致的结果。为了弥补这一gap，需要在保持e<sub>opt</sub>不变的情况下，再对diffusion模型进行微调。但这里要注意，文中提到这个fine-tuning过程也会对生成模型中的辅助模块，例如超分辨率模块进行微调，而且对这一部分的微调是基于原始的e<sub>tgt</sub>的。
 
 ### Text embedding interpolation
-微调结束之后，我们得到的生成扩散模型应该能基于e<sub>opt</sub>生成非常接近原图的结果。要得到想要的编辑效果，只需要将e<sub>tgt</sub>和e<sub>opt</sub>做一个简单的线性插值得到 $'\sqrt{e}'$ ，然后将其输入微调后的生成模型即可得到想要的编辑效果。
+微调结束之后，我们得到的生成扩散模型应该能基于e<sub>opt</sub>生成非常接近原图的结果。要得到想要的编辑效果，只需要将e<sub>tgt</sub>和e<sub>opt</sub>做一个简单的线性插值得到 $\overline{e}$ ，然后将其输入微调后的生成模型即可得到想要的编辑效果。
